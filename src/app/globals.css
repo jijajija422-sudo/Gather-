@@ -1,26 +1,205 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+@custom-variant dark (&:where(.dark, .dark *));
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  /* === Color Palette === */
+  --color-cream: #FAFAFA;
+  --color-cream-dark: #F0EBE3;
+  --color-sage: #8B9E8B;
+  --color-sage-light: #A8BCA8;
+  --color-sage-dark: #6B826B;
+  --color-sage-muted: rgba(139, 158, 139, 0.15);
+  --color-ink: #2C2C2C;
+  --color-ink-light: #6B6B6B;
+  --color-ink-faint: #9B9B9B;
+
+  /* === Typography === */
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, sans-serif;
+
+  /* === Animation === */
+  --animate-fade-in: fadeIn 0.6s ease-out both;
+  --animate-fade-in-up: fadeInUp 0.6s ease-out both;
+  --animate-fade-in-slow: fadeIn 1s ease-out both;
+
+  /* === Spacing === */
+  --spacing-18: 4.5rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* === Keyframes === */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
   }
 }
 
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* === Custom Selection Color === */
+::selection {
+  background: rgba(139, 158, 139, 0.3);
+  color: #2C2C2C;
+}
+
+::-moz-selection {
+  background: rgba(139, 158, 139, 0.3);
+  color: #2C2C2C;
+}
+
+/* === Global Styles === */
+html {
+  scroll-behavior: smooth;
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background:
+    radial-gradient(circle at top left, rgba(139, 158, 139, 0.09), transparent 30%),
+    #FAFAFA;
+  color: #2C2C2C;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  transition: background-color 0.25s ease, color 0.25s ease;
+}
+
+.dark body {
+  background:
+    radial-gradient(circle at top left, rgba(139, 158, 139, 0.16), transparent 28%),
+    #151515;
+  color: #f5efe6;
+}
+
+.dark .bg-white,
+.dark .bg-cream,
+.dark .bg-cream\/70,
+.dark .bg-white\/80,
+.dark .bg-white\/70 {
+  background-color: #1f1f1f !important;
+}
+
+.dark .border-ink\/10,
+.dark .border-ink\/5 {
+  border-color: rgba(245, 239, 230, 0.12) !important;
+}
+
+.dark .text-ink,
+.dark .text-ink-light,
+.dark .text-ink-faint {
+  color: #f5efe6 !important;
+}
+
+.dark .text-ink-light {
+  color: #cfc3b2 !important;
+}
+
+.dark .text-ink-faint {
+  color: #9f9382 !important;
+}
+
+::selection {
+  background: rgba(139, 158, 139, 0.28);
+  color: #2C2C2C;
+}
+
+/* === Reading Progress Bar === */
+.reading-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #8B9E8B, #A8BCA8);
+  z-index: 100;
+  transition: width 0.1s linear;
+  border-radius: 0 2px 2px 0;
+}
+
+/* === Zen Mode Transitions === */
+.zen-transition {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.zen-hidden {
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-8px);
+}
+
+/* === Scrollbar Styling === */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAFAFA;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #d4d4d4;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #b0b0b0;
+}
+
+/* === Article Typography === */
+.article-body p {
+  line-height: 1.8;
+  margin-bottom: 1.5rem;
+  font-size: 1.075rem;
+  color: #3a3a3a;
+}
+
+.article-body h2 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin-top: 2.5rem;
+  margin-bottom: 1rem;
+  color: #2C2C2C;
+}
+
+.article-body h3 {
+  font-family: 'Playfair Display', Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 600;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
+  color: #2C2C2C;
+}
+
+.article-body ul,
+.article-body ol {
+  margin-bottom: 1.5rem;
+  padding-left: 1.5rem;
+}
+
+.article-body li {
+  line-height: 1.8;
+  margin-bottom: 0.5rem;
+  color: #3a3a3a;
+}
+
+.article-body a {
+  color: #6B826B;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  transition: color 0.2s ease;
+}
+
+.article-body a:hover {
+  color: #8B9E8B;
 }
