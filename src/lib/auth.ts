@@ -70,5 +70,5 @@ export const authOptions: NextAuthOptions = {
   pages: {
     signIn: "/admin/login",
   },
-  secret: process.env.NEXTAUTH_SECRET,
+  secret: process.env.NEXTAUTH_SECRET || "fallback_secret_key_for_vercel_deploys",
 };
