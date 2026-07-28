@@ -3,6 +3,8 @@ import prisma from "@/lib/prisma";
 import SetupForm from "./SetupForm";
 import { Sparkles } from "lucide-react";
 
+export const dynamic = "force-dynamic";
+
 export default async function SetupPage() {
   const userCount = await prisma.user.count();
 

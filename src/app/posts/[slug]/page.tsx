@@ -12,9 +12,19 @@ function formatCategory(category: string | null | undefined) {
   return normalized === "NOTE" ? "Note" : "Essay";
 }
 
+export const dynamic = "force-dynamic";
+
 export async function generateStaticParams() {
-  const posts = await prisma.post.findMany({ select: { slug: true } });
-  return posts.map((post) => ({ slug: post.slug }));
+  try {
+    if (!process.env.DATABASE_URL) {
+      return [];
+    }
+    const posts = await prisma.post.findMany({ select: { slug: true } });
+    return posts.map((post) => ({ slug: post.slug }));
+  } catch (error) {
+    console.warn("Skipping static params generation due to build-time DB absence.");
+    return [];
+  }
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {

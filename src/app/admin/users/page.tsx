@@ -2,6 +2,8 @@ import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import prisma from "@/lib/prisma";
 import { redirect } from "next/navigation";
+
+export const dynamic = "force-dynamic";
 import InviteForm from "./InviteForm";
 import Link from "next/link";
 import { ArrowLeft, Users, UserPlus, Shield, PenSquare } from "lucide-react";

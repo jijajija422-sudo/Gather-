@@ -2,6 +2,8 @@ import { Sparkles, BookOpen } from "lucide-react";
 import prisma from "@/lib/prisma";
 import SearchablePosts from "@/components/home/SearchablePosts";
 
+export const dynamic = "force-dynamic";
+
 function formatCategory(category: string | null | undefined) {
   const normalized = (category || "ESSAY").toUpperCase();
   return normalized === "NOTE" ? "Note" : "Essay";
