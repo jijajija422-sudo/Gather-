@@ -1,5 +1,5 @@
 import { PostForm } from "../../PostForm";
-import prisma from "@/lib/prisma";
+import { getPostById } from "@/lib/db";
 import { notFound, redirect } from "next/navigation";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
@@ -16,13 +16,12 @@ export default async function EditPostPage({ params }: PageProps) {
     redirect("/admin/login");
   }
 
-  const post = await prisma.post.findUnique({
-    where: { id },
-  });
+  const post = await getPostById(id);
 
   if (!post) {
     notFound();
   }
+
 
   if (post.authorId !== session.user.id && session.user.role !== "ADMIN") {
     redirect("/admin");

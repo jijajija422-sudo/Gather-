@@ -1,7 +1,8 @@
 "use server";
 
-import prisma from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { auth } from "@/lib/firebase";
+import { createUserWithEmailAndPassword } from "firebase/auth";
+import { getInvitationByToken, createUser, deleteInvitation } from "@/lib/db";
 
 export async function acceptInvitation(formData: FormData) {
   const token = formData.get("token") as string;
@@ -12,38 +13,32 @@ export async function acceptInvitation(formData: FormData) {
     return { error: "All fields are required" };
   }
 
-  const invite = await prisma.invitation.findUnique({
-    where: { token },
-  });
+  const invite = await getInvitationByToken(token);
 
   if (!invite) {
     return { error: "Invalid invitation" };
   }
 
-  if (new Date() > invite.expiresAt) {
-    await prisma.invitation.delete({ where: { token } });
+  if (new Date() > new Date(invite.expiresAt)) {
+    await deleteInvitation(invite.id);
     return { error: "Invitation has expired" };
   }
 
-  const passwordHash = await bcrypt.hash(password, 10);
-
   try {
-    await prisma.$transaction([
-      prisma.user.create({
-        data: {
-          name,
-          email: invite.email,
-          passwordHash,
-          role: invite.role,
-        },
-      }),
-      prisma.invitation.delete({
-        where: { token },
-      })
-    ]);
+    // Create user in Firebase Auth
+    const userCred = await createUserWithEmailAndPassword(auth, invite.email, password);
+    const uid = userCred.user.uid;
+
+    // Save profile metadata in Firestore
+    await createUser(uid, name, invite.email, invite.role);
+
+    // Delete the invitation
+    await deleteInvitation(invite.id);
 
     return { success: true };
   } catch (error: any) {
-    return { error: error.message };
+    console.error("Firebase invite registration error:", error.message || error);
+    return { error: error.message || "Failed to accept invitation" };
   }
 }
+

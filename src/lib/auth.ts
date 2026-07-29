@@ -1,7 +1,8 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
-import prisma from "@/lib/prisma";
+import { auth } from "@/lib/firebase";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { getUserByEmail } from "@/lib/db";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -17,34 +18,37 @@ export const authOptions: NextAuthOptions = {
           return null;
         }
 
-        const user = await prisma.user.findUnique({
-          where: { email: credentials.email },
-        });
+        try {
+          console.log(`[Auth] Authenticating against Firebase Auth: ${credentials.email}...`);
+          const userCred = await signInWithEmailAndPassword(
+            auth,
+            credentials.email,
+            credentials.password
+          );
 
-        if (!user) {
-          console.log(`[Auth] No user found for email: ${credentials.email}`);
+          if (!userCred.user) {
+            console.log("[Auth] Firebase authentication failed: No user returned");
+            return null;
+          }
+
+          console.log(`[Auth] Firebase Auth success. Fetching Firestore profile for: ${credentials.email}`);
+          const profile = await getUserByEmail(credentials.email);
+
+          if (!profile) {
+            console.log(`[Auth] No Firestore profile found for: ${credentials.email}`);
+            return null;
+          }
+
+          return {
+            id: profile.id,
+            email: profile.email,
+            name: profile.name,
+            role: profile.role,
+          };
+        } catch (error: any) {
+          console.error("[Auth] Firebase authentication error:", error.message || error);
           return null;
         }
-
-        console.log(`[Auth] Found user: ${user.email}, checking password...`);
-
-        const isPasswordValid = await bcrypt.compare(
-          credentials.password,
-          user.passwordHash
-        );
-
-        console.log(`[Auth] Password valid: ${isPasswordValid}`);
-
-        if (!isPasswordValid) {
-          return null;
-        }
-
-        return {
-          id: user.id,
-          email: user.email,
-          name: user.name,
-          role: user.role,
-        };
       },
     }),
   ],
@@ -72,3 +76,4 @@ export const authOptions: NextAuthOptions = {
   },
   secret: process.env.NEXTAUTH_SECRET || "fallback_secret_key_for_vercel_deploys",
 };
+

@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import prisma from "@/lib/prisma";
+import { getInvitationByToken, deleteInvitation } from "@/lib/db";
 import AcceptInviteForm from "./AcceptInviteForm";
 
 interface PageProps {
@@ -9,9 +9,7 @@ interface PageProps {
 export default async function InvitePage({ params }: PageProps) {
   const { token } = await params;
   
-  const invite = await prisma.invitation.findUnique({
-    where: { token },
-  });
+  const invite = await getInvitationByToken(token);
 
   if (!invite) {
     return (
@@ -24,8 +22,8 @@ export default async function InvitePage({ params }: PageProps) {
     );
   }
 
-  if (new Date() > invite.expiresAt) {
-    await prisma.invitation.delete({ where: { token } });
+  if (new Date() > new Date(invite.expiresAt)) {
+    await deleteInvitation(invite.id);
     return (
       <div className="min-h-screen flex items-center justify-center -mt-20">
         <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-gray-100 text-center">
@@ -35,6 +33,7 @@ export default async function InvitePage({ params }: PageProps) {
       </div>
     );
   }
+
 
   return (
     <div className="min-h-screen flex items-center justify-center -mt-20">

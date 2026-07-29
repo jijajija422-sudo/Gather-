@@ -1,11 +1,12 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { getPostById, getPostBySlug, createPost, updatePost, deletePost as dbDeletePost } from "@/lib/db";
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { formatReadTime } from "@/lib/readTime";
+import crypto from "crypto";
 
 export async function savePost(formData: FormData) {
   const session = await getServerSession(authOptions);
@@ -29,13 +30,8 @@ export async function savePost(formData: FormData) {
   let slug = baseSlug;
   let count = 1;
   while (true) {
-    const duplicate = await prisma.post.findFirst({
-      where: {
-        slug,
-        id: id ? { not: id } : undefined,
-      },
-    });
-    if (!duplicate) break;
+    const duplicate = await getPostBySlug(slug);
+    if (!duplicate || (id && duplicate.id === id)) break;
     slug = `${baseSlug}-${count}`;
     count++;
   }
@@ -43,36 +39,38 @@ export async function savePost(formData: FormData) {
   const readTime = formatReadTime(content);
 
   if (id) {
-    const existing = await prisma.post.findUnique({ where: { id } });
+    const existing = await getPostById(id);
     if (!existing || (existing.authorId !== session.user.id && session.user.role !== "ADMIN")) {
       return;
     }
 
-    await prisma.post.update({
-      where: { id },
-      data: {
-        title,
-        slug,
-        excerpt,
-        content,
-        coverImage,
-        category: category.toUpperCase(),
-        published,
-        readTime,
-      },
+    await updatePost(id, {
+      title,
+      slug,
+      excerpt,
+      content,
+      coverImage,
+      category: category.toUpperCase(),
+      published,
+      readTime,
     });
   } else {
-    await prisma.post.create({
-      data: {
-        title,
-        slug,
-        excerpt,
-        content,
-        coverImage,
-        category: category.toUpperCase(),
-        published,
-        readTime,
-        authorId: session.user.id,
+    const newId = crypto.randomUUID();
+    await createPost({
+      id: newId,
+      title,
+      slug,
+      excerpt,
+      content,
+      coverImage,
+      category: category.toUpperCase(),
+      published,
+      readTime,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      authorId: session.user.id,
+      author: {
+        name: session.user.name || "Author",
       },
     });
   }
@@ -86,7 +84,7 @@ export async function deletePost(postId: string) {
   const session = await getServerSession(authOptions);
   if (!session?.user) return;
 
-  const post = await prisma.post.findUnique({ where: { id: postId } });
+  const post = await getPostById(postId);
   if (!post) return;
 
   // Only the post's author or an admin can delete
@@ -94,8 +92,9 @@ export async function deletePost(postId: string) {
     return;
   }
 
-  await prisma.post.delete({ where: { id: postId } });
+  await dbDeletePost(postId);
 
   revalidatePath("/");
   revalidatePath("/admin");
 }
+

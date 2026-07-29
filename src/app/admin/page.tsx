@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import { getPosts, getUserCount } from "@/lib/db";
 import Link from "next/link";
 
 export const dynamic = "force-dynamic";
@@ -24,17 +24,16 @@ export default async function AdminDashboard() {
   const isAdmin = session.user.role === "ADMIN";
 
   // Fetch posts based on role
-  const posts = await prisma.post.findMany({
-    where: isAdmin ? undefined : { authorId: session.user.id },
-    orderBy: { createdAt: "desc" },
-    include: { author: { select: { name: true } } },
-  });
+  const posts = await getPosts(
+    isAdmin ? undefined : { authorId: session.user.id }
+  );
 
   // Stats
   const totalPosts = posts.length;
   const publishedPosts = posts.filter((p) => p.published).length;
   const draftPosts = totalPosts - publishedPosts;
-  const authorCount = isAdmin ? await prisma.user.count() : null;
+  const authorCount = isAdmin ? await getUserCount() : null;
+
 
   return (
     <div className="animate-fade-in space-y-8">

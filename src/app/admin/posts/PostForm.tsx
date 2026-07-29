@@ -3,12 +3,41 @@
 import { useState } from "react";
 import { savePost } from "./actions";
 import Link from "next/link";
-import { ArrowLeft, Save } from "lucide-react";
+import { ArrowLeft, Save, Upload, Check, Loader2 } from "lucide-react";
 
 export function PostForm({ post }: { post?: any }) {
   const [published, setPublished] = useState(Boolean(post?.published));
   const [category, setCategory] = useState(post?.category || "ESSAY");
   const [loading, setLoading] = useState(false);
+  const [coverImageUrl, setCoverImageUrl] = useState(post?.coverImage || "");
+  const [uploading, setUploading] = useState(false);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploading(true);
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json();
+      if (data.url) {
+        setCoverImageUrl(data.url);
+      } else {
+        alert(data.error || "Upload failed");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error uploading file");
+    } finally {
+      setUploading(false);
+    }
+  };
 
   return (
     <form
@@ -100,14 +129,35 @@ export function PostForm({ post }: { post?: any }) {
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-faint">
               Cover image
             </label>
-            <input
-              name="coverImage"
-              defaultValue={post?.coverImage}
-              type="text"
-              className="w-full rounded-2xl border border-ink/10 bg-cream/50 px-4 py-3 text-sm outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/20 placeholder:text-ink-faint/50"
-              placeholder="/images/cover-featured.png"
-            />
+            <div className="flex gap-2">
+              <input
+                name="coverImage"
+                value={coverImageUrl}
+                onChange={(e) => setCoverImageUrl(e.target.value)}
+                type="text"
+                className="w-full rounded-2xl border border-ink/10 bg-cream/50 px-4 py-3 text-sm outline-none transition focus:border-sage focus:ring-2 focus:ring-sage/20 placeholder:text-ink-faint/50"
+                placeholder="/images/cover-featured.png"
+              />
+              <label className="flex items-center gap-1.5 rounded-2xl border border-ink/10 bg-white dark:bg-white/5 px-4 py-3 text-xs font-medium text-ink cursor-pointer hover:border-sage/40 transition">
+                {uploading ? (
+                  <Loader2 className="h-4 w-4 animate-spin text-sage" />
+                ) : coverImageUrl ? (
+                  <Check className="h-4 w-4 text-sage" />
+                ) : (
+                  <Upload className="h-4 w-4 text-ink-faint" />
+                )}
+                <span>Upload</span>
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleUpload}
+                  className="hidden"
+                  disabled={uploading}
+                />
+              </label>
+            </div>
           </div>
+
 
           <div>
             <label className="mb-1.5 block text-xs font-semibold uppercase tracking-wider text-ink-faint">

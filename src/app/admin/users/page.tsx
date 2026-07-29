@@ -1,6 +1,6 @@
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/lib/auth";
-import prisma from "@/lib/prisma";
+import { getAllUsers, getAllInvitations, getPosts } from "@/lib/db";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -15,16 +15,20 @@ export default async function UsersPage() {
     redirect("/admin");
   }
 
-  const users = await prisma.user.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      _count: { select: { posts: true } },
-    },
+  const allDbUsers = await getAllUsers();
+  const allPosts = await getPosts();
+  const pendingInvites = await getAllInvitations();
+
+  const users = allDbUsers.map((u) => {
+    const userPostsCount = allPosts.filter((p) => p.authorId === u.id).length;
+    return {
+      ...u,
+      _count: {
+        posts: userPostsCount,
+      },
+    };
   });
 
-  const pendingInvites = await prisma.invitation.findMany({
-    orderBy: { createdAt: "desc" },
-  });
 
   return (
     <div className="animate-fade-in">

@@ -1,6 +1,6 @@
 "use server";
 
-import prisma from "@/lib/prisma";
+import { getUserByEmail, getInvitationByEmail, deleteInvitation, createInvitation as dbCreateInvitation } from "@/lib/db";
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 
@@ -12,29 +12,21 @@ export async function createInvitation(formData: FormData) {
   }
 
   // Check if user already exists
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser = await getUserByEmail(email);
   if (existingUser) {
     return { error: "User already exists with this email" };
   }
 
   // Check if invitation already exists
-  const existingInvite = await prisma.invitation.findUnique({ where: { email } });
+  const existingInvite = await getInvitationByEmail(email);
   if (existingInvite) {
-    await prisma.invitation.delete({ where: { email } });
+    await deleteInvitation(existingInvite.id);
   }
 
   const token = crypto.randomUUID();
-  const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000);
 
   try {
-    await prisma.invitation.create({
-      data: {
-        email,
-        token,
-        role: "AUTHOR",
-        expiresAt,
-      },
-    });
+    await dbCreateInvitation(email, token, "AUTHOR");
 
     revalidatePath("/admin/users");
     
@@ -44,3 +36,5 @@ export async function createInvitation(formData: FormData) {
     return { error: error.message };
   }
 }
+
+

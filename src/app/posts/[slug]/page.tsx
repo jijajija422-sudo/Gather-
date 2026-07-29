@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import prisma from "@/lib/prisma";
+import { getPosts, getPostBySlug } from "@/lib/db";
 import ArticleView from "@/components/article/ArticleView";
 import type { Metadata } from "next";
 
@@ -16,10 +16,7 @@ export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   try {
-    if (!process.env.DATABASE_URL) {
-      return [];
-    }
-    const posts = await prisma.post.findMany({ select: { slug: true } });
+    const posts = await getPosts();
     return posts.map((post) => ({ slug: post.slug }));
   } catch (error) {
     console.warn("Skipping static params generation due to build-time DB absence.");
@@ -29,7 +26,7 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = await prisma.post.findUnique({ where: { slug } });
+  const post = await getPostBySlug(slug);
   if (!post) return { title: "Post Not Found" };
 
   return {
@@ -40,10 +37,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function PostPage({ params }: PageProps) {
   const { slug } = await params;
-  const dbPost = await prisma.post.findUnique({
-    where: { slug },
-    include: { author: { select: { name: true } } },
-  });
+  const dbPost = await getPostBySlug(slug);
 
   if (!dbPost) {
     notFound();
@@ -66,3 +60,4 @@ export default async function PostPage({ params }: PageProps) {
 
   return <ArticleView post={post} />;
 }
+

@@ -1,5 +1,5 @@
-import { Sparkles, BookOpen } from "lucide-react";
-import prisma from "@/lib/prisma";
+import { Sparkles, BookOpen, ArrowDown } from "lucide-react";
+import { getPosts } from "@/lib/db";
 import SearchablePosts from "@/components/home/SearchablePosts";
 
 export const dynamic = "force-dynamic";
@@ -10,11 +10,7 @@ function formatCategory(category: string | null | undefined) {
 }
 
 export default async function HomePage() {
-  const allPosts = await prisma.post.findMany({
-    where: { published: true },
-    orderBy: { createdAt: "desc" },
-    include: { author: { select: { name: true } } },
-  });
+  const allPosts = await getPosts({ publishedOnly: true });
 
   const posts = allPosts.map((post) => ({
     slug: post.slug,
