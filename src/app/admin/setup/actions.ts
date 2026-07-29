@@ -2,7 +2,7 @@
 
 import { auth } from "@/lib/firebase";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { getUserCount, createUser } from "@/lib/db";
+import { getAdminUserCount, createUser } from "@/lib/db";
 
 export async function createAdminAccount(formData: FormData) {
   const name = formData.get("name") as string;
@@ -13,11 +13,12 @@ export async function createAdminAccount(formData: FormData) {
     return { error: "All fields are required" };
   }
 
-  // Double check that no users exist to prevent malicious calls
-  const userCount = await getUserCount();
-  if (userCount > 0) {
+  // Double check that no admin users exist to prevent malicious calls
+  const adminCount = await getAdminUserCount();
+  if (adminCount > 0) {
     return { error: "Admin account already exists. Setup is locked." };
   }
+
 
   try {
     // Create user in Firebase Auth
