@@ -55,6 +55,13 @@ export async function getUserCount(): Promise<number> {
   return snap.size;
 }
 
+export async function getAdminUserCount(): Promise<number> {
+  const q = query(collection(db, "users"), where("role", "==", "ADMIN"));
+  const snap = await getDocs(q);
+  return snap.size;
+}
+
+
 export async function getUserByEmail(email: string): Promise<User | null> {
   const q = query(collection(db, "users"), where("email", "==", email));
   const snap = await getDocs(q);
@@ -182,21 +189,18 @@ export async function getPosts(options?: {
   orderByField?: string;
 }): Promise<Post[]> {
   const constraints = [];
-  
+
   if (options?.publishedOnly) {
     constraints.push(where("published", "==", true));
   }
-  
+
   if (options?.authorId) {
     constraints.push(where("authorId", "==", options.authorId));
   }
 
-  // Always order by createdAt desc by default
-  constraints.push(orderBy(options?.orderByField || "createdAt", "desc"));
-
   const q = query(collection(db, "posts"), ...constraints);
   const snap = await getDocs(q);
-  return snap.docs.map((d) => {
+  const posts = snap.docs.map((d) => {
     const data = d.data();
     return {
       id: d.id,
@@ -214,6 +218,15 @@ export async function getPosts(options?: {
       author: data.author || { name: "Author" },
     } as Post;
   });
+
+  const orderByField = options?.orderByField || "createdAt";
+  posts.sort((a, b) => {
+    const left = (a[orderByField as keyof Post] as string | undefined) ?? "";
+    const right = (b[orderByField as keyof Post] as string | undefined) ?? "";
+    return String(right).localeCompare(String(left));
+  });
+
+  return posts;
 }
 
 export async function getPostById(id: string): Promise<Post | null> {
