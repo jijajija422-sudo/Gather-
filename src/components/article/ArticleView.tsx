@@ -145,16 +145,19 @@ function formatDate(dateString: string): string {
 
 export default function ArticleView({ post }: ArticleViewProps) {
   const { zenMode, toggleZenMode } = useZenMode();
+  const isUrl = post.coverImage && (post.coverImage.trim().startsWith("/") || post.coverImage.trim().startsWith("http"));
+  const imageSrc = isUrl ? post.coverImage.trim() : "/images/cover-featured.png";
 
   return (
     <>
       <ReadingProgressBar />
 
+
       <article className="animate-fade-in" id="article-page">
         <div className="relative mx-auto w-full max-w-4xl px-6 pt-8">
           <div className="relative aspect-[21/9] overflow-hidden rounded-[2rem] border border-ink/10 shadow-[0_20px_70px_-35px_rgba(43,43,43,0.35)]">
             <Image
-              src={post.coverImage}
+              src={imageSrc}
               alt={post.title}
               fill
               className="object-cover"
@@ -163,6 +166,7 @@ export default function ArticleView({ post }: ArticleViewProps) {
             />
           </div>
         </div>
+
 
         <header className="mx-auto max-w-2xl px-6 pb-8 pt-10">
           <Link

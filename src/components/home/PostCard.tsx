@@ -23,6 +23,9 @@ export default function PostCard({
   coverImage,
   featured = false,
 }: PostCardProps) {
+  const isUrl = coverImage && (coverImage.trim().startsWith("/") || coverImage.trim().startsWith("http"));
+  const imageSrc = isUrl ? coverImage.trim() : "/images/cover-featured.png";
+
   return (
     <Link
       href={`/posts/${slug}`}
@@ -33,7 +36,7 @@ export default function PostCard({
     >
       <div className={`relative overflow-hidden ${featured ? "aspect-[16/9]" : "aspect-[16/10]"}`}>
         <Image
-          src={coverImage}
+          src={imageSrc}
           alt={title}
           fill
           className="object-cover transition-transform duration-1000 ease-out group-hover:scale-[1.03]"
@@ -45,6 +48,7 @@ export default function PostCard({
           {category}
         </span>
       </div>
+
 
       <div className={`p-6 ${featured ? "md:p-10" : ""}`}>
         <h2
