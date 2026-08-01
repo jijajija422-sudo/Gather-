@@ -20,6 +20,7 @@ export default function Header() {
     const stored = window.localStorage.getItem("gather-theme");
     const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const initialDark = stored ? stored === "dark" : prefersDark;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setDarkMode(initialDark);
     document.documentElement.classList.toggle("dark", initialDark);
   }, []);

@@ -44,7 +44,7 @@ export default async function AdminDashboard() {
             Welcome back, {session.user.name?.split(" ")[0]}
           </h1>
           <p className="mt-1 text-sm text-ink-light">
-            Here's the latest status of your publication.
+            Here&apos;s the latest status of your publication.
           </p>
         </div>
         <div className="flex items-center gap-3">

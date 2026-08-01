@@ -29,9 +29,10 @@ export async function createAdminAccount(formData: FormData) {
     await createUser(uid, name, email, "ADMIN");
 
     return { success: true };
-  } catch (error: any) {
-    console.error("Firebase admin registration error:", error.message || error);
-    return { error: error.message || "Failed to create account" };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to create account";
+    console.error("Firebase admin registration error:", message);
+    return { error: message };
   }
 }
 

@@ -38,8 +38,8 @@ export async function createInvitation(formData: FormData) {
     const inviteLink = `${protocol}://${host}/admin/invite/${token}`;
     
     return { success: true, link: inviteLink };
-  } catch (error: any) {
-    return { error: error.message };
+  } catch (error: unknown) {
+    return { error: error instanceof Error ? error.message : "An error occurred" };
   }
 }
 

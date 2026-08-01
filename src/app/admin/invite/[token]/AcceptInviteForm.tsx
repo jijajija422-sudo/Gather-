@@ -50,7 +50,7 @@ export default function AcceptInviteForm({
             Join Gather
           </h1>
           <p className="mt-1 text-sm text-ink-faint">
-            You've been invited to contribute as an Author.
+            You&apos;ve been invited to contribute as an Author.
           </p>
         </div>
 
@@ -113,7 +113,7 @@ export default function AcceptInviteForm({
         </form>
 
         <p className="mt-6 text-center text-xs text-ink-faint">
-          By joining, you'll be able to write and publish posts.
+          By joining, you&apos;ll be able to write and publish posts.
         </p>
       </div>
     </div>

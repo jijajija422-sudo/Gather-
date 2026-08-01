@@ -10,7 +10,6 @@ import {
   query,
   where,
   orderBy,
-  limit,
 } from "firebase/firestore";
 
 export interface User {

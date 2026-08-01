@@ -36,9 +36,10 @@ export async function acceptInvitation(formData: FormData) {
     await deleteInvitation(invite.id);
 
     return { success: true };
-  } catch (error: any) {
-    console.error("Firebase invite registration error:", error.message || error);
-    return { error: error.message || "Failed to accept invitation" };
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : "Failed to accept invitation";
+    console.error("Firebase invite registration error:", message);
+    return { error: message };
   }
 }
 

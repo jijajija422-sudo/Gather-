@@ -1,4 +1,3 @@
-import { redirect } from "next/navigation";
 import { getInvitationByToken, deleteInvitation } from "@/lib/db";
 import AcceptInviteForm from "./AcceptInviteForm";
 
@@ -40,7 +39,7 @@ export default async function InvitePage({ params }: PageProps) {
       <div className="max-w-md w-full bg-white p-8 rounded-2xl shadow-sm border border-gray-100">
         <h2 className="text-2xl font-serif text-center mb-2">Join Gather</h2>
         <p className="text-sm text-gray-500 text-center mb-8">
-          You've been invited to contribute as an Author. Set up your account below.
+          You&apos;ve been invited to contribute as an Author. Set up your account below.
         </p>
         <AcceptInviteForm email={invite.email} token={token} />
       </div>

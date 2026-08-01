@@ -74,8 +74,8 @@ export const authOptions: NextAuthOptions = {
             name: profile.name,
             role: profile.role,
           };
-        } catch (error: any) {
-          console.error("[Auth] Firebase authentication error:", error.message || error);
+        } catch (error: unknown) {
+          console.error("[Auth] Firebase authentication error:", error instanceof Error ? error.message : error);
           return null;
         }
       },

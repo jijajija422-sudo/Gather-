@@ -5,7 +5,7 @@ import { savePost } from "./actions";
 import Link from "next/link";
 import { ArrowLeft, Save, Upload, Check, Loader2 } from "lucide-react";
 
-export function PostForm({ post }: { post?: any }) {
+export function PostForm({ post }: { post?: { id?: string, published?: boolean, category?: string, coverImage?: string, title?: string, excerpt?: string, content?: string } }) {
   const [published, setPublished] = useState(Boolean(post?.published));
   const [category, setCategory] = useState(post?.category || "ESSAY");
   const [loading, setLoading] = useState(false);

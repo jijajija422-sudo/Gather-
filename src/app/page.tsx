@@ -1,4 +1,4 @@
-import { Sparkles, BookOpen, ArrowDown } from "lucide-react";
+import { Sparkles, BookOpen } from "lucide-react";
 import { getPosts } from "@/lib/db";
 import SearchablePosts from "@/components/home/SearchablePosts";
 
@@ -56,7 +56,7 @@ export default async function HomePage() {
                 Currently Reading
               </div>
               <p className="font-serif text-lg font-bold text-ink italic leading-snug">
-                "The Art of Making Space"
+                &quot;The Art of Making Space&quot;
               </p>
               <p className="mt-2 text-sm leading-relaxed text-ink-light">
                 Exploring the balance between constant connectivity and quiet solitude, page by page.

@@ -18,7 +18,7 @@ export async function generateStaticParams() {
   try {
     const posts = await getPosts();
     return posts.map((post) => ({ slug: post.slug }));
-  } catch (error) {
+  } catch {
     console.warn("Skipping static params generation due to build-time DB absence.");
     return [];
   }
