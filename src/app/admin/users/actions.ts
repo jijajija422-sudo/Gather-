@@ -4,6 +4,8 @@ import { getUserByEmail, getInvitationByEmail, deleteInvitation, createInvitatio
 import { revalidatePath } from "next/cache";
 import crypto from "crypto";
 
+import { headers } from "next/headers";
+
 export async function createInvitation(formData: FormData) {
   const email = formData.get("email") as string;
   
@@ -30,11 +32,16 @@ export async function createInvitation(formData: FormData) {
 
     revalidatePath("/admin/users");
     
-    const inviteLink = `${process.env.NEXTAUTH_URL || "http://localhost:3000"}/admin/invite/${token}`;
+    const headersList = await headers();
+    const host = headersList.get("host") || "localhost:3000";
+    const protocol = host.includes("localhost") ? "http" : "https";
+    const inviteLink = `${protocol}://${host}/admin/invite/${token}`;
+    
     return { success: true, link: inviteLink };
   } catch (error: any) {
     return { error: error.message };
   }
 }
+
 
 
